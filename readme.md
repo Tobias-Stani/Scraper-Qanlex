@@ -61,7 +61,7 @@ A continuación, se detalla cómo cada campo extraído por el scraper correspond
 | **Demandante**           | Actores o personas que inician el caso judicial.                     | Extraído como parte de los **actores** en el expediente.  |
 | **Demandado**            | Personas o entidades contra las cuales se inicia el proceso judicial. | Extraído como parte de los **demandados** en el expediente.|
 | **Carátula**             | Breve descripción o resumen del caso judicial.                       | Corresponde a la **carátula** o descripción del caso.     |
-| **Tipo de Demanda**      | Tipo de caso o acción legal (por ejemplo, "Acción Civil").            | Corresponde al **tipo de demanda** o acción judicial.     |
+| **Tipo de Demanda**      | Tipo de caso o acción legal (por ejemplo, "Acción Civil").            | Corresponde a la **carátula**.     |
 | **Juzgado o Tribunal**   | Juzgado o tribunal que está encargado del expediente.                 | Extraído de la información de **jurisdicción** y **dependencia**. |
 | **Fechas Relevantes**    | Fechas importantes asociadas al expediente (por ejemplo, fechas de audiencias, resoluciones). | Las **fechas** de los **movimientos** de cada expediente se extraen para registrar los eventos claves. |
 
