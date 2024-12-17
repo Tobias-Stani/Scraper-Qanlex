@@ -53,8 +53,8 @@ Herramienta automatizada para extracción de datos de expedientes judiciales del
 ### 1. Clonar Repositorio
 
 ```bash
-git clone https://github.com/[tu-usuario]/scraper-casos-judiciales.git
-cd scraper-casos-judiciales
+git clone https://github.com/Tobias-Stani/Scraper-Qanlex.git
+cd Scraper-Qanlex
 ```
 
 ### 2. Levantar Infraestructura Docker
