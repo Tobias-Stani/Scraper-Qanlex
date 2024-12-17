@@ -1,151 +1,98 @@
-# Scraper de Casos Judiciales
+# Scraper de Casos Judiciales del Poder Judicial
 
-## Descripción del Proyecto
+## 📝 Descripción del Proyecto
 
-Este proyecto automatiza la extracción de casos judiciales del sitio web del Poder Judicial Nacional, realizando las siguientes tareas:
-- Scraping web de expedientes judiciales
-- Extracción de datos detallados
-- Almacenamiento en formato JSON
-- Carga de datos a base de datos MySQL
+Este proyecto es una herramienta de extracción automatizada de información de casos judiciales del sitio web del Poder Judicial Nacional. Su objetivo principal es:
 
-## Flujo de Trabajo
+- Recopilar datos de expedientes judiciales
+- Extraer información detallada como número de expediente, jurisdicción, partes intervinientes, movimientos, etc.
+- Almacenar la información de manera estructurada en una base de datos MySQL
 
-### 1. Scraping de Datos
-- Script: `scraper.py`
-- Función: Extraer información de casos judiciales
-- Salida: Archivo `src/expedientes.json`
+## 🗂️ Archivos del Proyecto
 
-### 2. Carga de Datos 
-- Script: `uploader.py`
-- Función: Subir datos extraídos a base de datos MySQL
-- Acción: Elimina archivo JSON después de la carga
+### 1. `scraper.py`
+- **Función**: Extracción de datos judiciales
+- **Acciones**:
+  - Navega por el sitio web del Poder Judicial
+  - Resuelve manualmente el CAPTCHA
+  - Busca casos relacionados con "residuos"
+  - Extrae información de cada expediente
+  - Guarda los datos en un archivo `expedientes.json`
 
-## Requisitos Previos
+### 2. `guardarDb.py`
+- **Función**: Carga de datos a base de datos MySQL
+- **Acciones**:
+  - Lee el archivo `expedientes.json`
+  - Inserta datos en tres tablas:
+    1. `expedientes`: Información general del caso
+    2. `movimientos`: Registros y movimientos del expediente
+    3. `participantes`: Actores y demandados
+  - Elimina el archivo JSON después de la carga
 
-- Python 3.8+
-- Google Chrome
-- Docker y Docker Compose
-- Dependencias:
-  - selenium
-  - webdriver-manager
-  - mysql-connector-python
+## 🐳 Configuración con Docker
 
-## Instalación de Dependencias
+### Requisitos Previos
+- Docker
+- Docker Compose
 
+### Pasos para Levantar el Proyecto
+
+1. **Construir Contenedores**
 ```bash
-pip install -r requirements.txt
+docker-compose build
 ```
 
-## Uso Manual (Sin Docker)
+2. **Iniciar Servicios**
+```bash
+docker-compose up
+```
 
-### 1. Ejecutar Scraper
+### Lo que Sucede Automáticamente
 
+- Crea un contenedor MySQL
+- Genera la base de datos `scraper_data`
+- Crea las tablas necesarias
+- Levanta un contenedor con la aplicación de scraping
+- Habilita phpMyAdmin para administración (puerto 9080)
+
+### Ejecución de Scripts
+
+Los scripts se ejecutarán de forma automatizada:
+
+1. **Scraper**
 ```bash
 python scraper.py
 ```
 
-🚨 **IMPORTANTE**: 
-- Durante la ejecución, será necesario resolver manualmente el CAPTCHA
-- Los datos se guardarán en `src/expedientes.json`
+2. **Uploader**
+```bash
+python guardarDb.py
+```
 
-### 2. Subir Datos a MySQL
+## 🔍 Detalles Técnicos
+
+### Base de Datos
+
+Tablas creadas:
+- `expedientes`: Datos generales del caso
+- `movimientos`: Historial de movimientos
+- `participantes`: Actores y demandados
+
+### Tecnologías
+
+- Lenguaje: Python
+- Web Scraping: Selenium
+- Base de Datos: MySQL
+- Contenedores: Docker
+
+## 🚨 Consideraciones Importantes
+
+- Resolución **manual** de CAPTCHA
+- Conexión a internet estable
+- Instalación de Google Chrome
+
+## 📦 Instalación de Dependencias
 
 ```bash
-python uploader.py
+pip install -r requirements.txt
 ```
-
-🔍 **Proceso Detallado**:
-1. El scraper extrae los casos
-2. Se genera un archivo `expedientes.json`
-3. El uploader carga los datos en MySQL
-4. El archivo JSON se elimina automáticamente
-
-## Despliegue con Docker
-
-### Requisitos
-
-- Docker
-- Docker Compose
-
-### Comandos Docker
-
-```bash
-# Construir e iniciar contenedores
-docker-compose up --build
-
-# Ejecutar scraper dentro del contenedor
-docker-compose exec scraper python /app/src/scraper.py
-
-# Ejecutar uploader dentro del contenedor
-docker-compose exec scraper python /app/uploader.py
-```
-
-## Configuración de Base de Datos
-
-### Estructura de Tablas MySQL
-
-1. `expedientes`
-```sql
-CREATE TABLE expedientes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    expediente VARCHAR(255),
-    jurisdiccion VARCHAR(255),
-    dependencia VARCHAR(255),
-    situacion_actual TEXT,
-    caratula TEXT
-);
-```
-
-2. `movimientos`
-```sql
-CREATE TABLE movimientos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    expediente_id INT,
-    fecha DATE,
-    tipo VARCHAR(255),
-    detalle TEXT,
-    FOREIGN KEY (expediente_id) REFERENCES expedientes(id)
-);
-```
-
-3. `participantes`
-```sql
-CREATE TABLE participantes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    expediente_id INT,
-    tipo ENUM('ACTOR', 'DEMANDADO'),
-    nombre VARCHAR(255),
-    FOREIGN KEY (expediente_id) REFERENCES expedientes(id)
-);
-```
-
-## Configuración de Conexión
-
-Credenciales predeterminadas:
-- **Host**: 172.29.0.2
-- **Usuario**: scraperuser
-- **Contraseña**: scraperpass
-- **Base de Datos**: scraper_data
-
-## Componentes del Proyecto
-
-- `scraper.py`: Extracción web de casos
-- `uploader.py`: Carga de datos a MySQL
-- `Dockerfile`: Configuración del entorno
-- `docker-compose.yml`: Orquestación de servicios
-
-## Consideraciones
-
-- Resolver CAPTCHA manualmente
-- Verificar conexión a internet
-- Comprobar instalación de Chrome
-- Validar credenciales de base de datos
-
-## Contribución
-
-1. Fork del repositorio
-2. Crear rama de características
-3. Commit de cambios
-4. Push de rama
-5. Abrir Pull Request
-
