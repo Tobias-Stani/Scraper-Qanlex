@@ -39,7 +39,9 @@ Herramienta automatizada para la extracción de datos de **expedientes judiciale
 - Inserta los datos en tres tablas relacionales:
   1. **`expedientes`**: Información general del caso.  
   2. **`movimientos`**: Historial de movimientos del expediente.  
-  3. **`participantes`**: Listado de actores y demandados.  
+  3. **`participantes`**: Listado de actores y demandados. 
+- Elimina el archivo.
+- Cierra la conexion.  
 
 #### 🔧 **Procesamiento de Datos**
 - Limpia y formatea las fechas.
