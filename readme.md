@@ -29,7 +29,7 @@ Herramienta automatizada para la extracción de datos de **expedientes judiciale
 
 ---
 
-### 2. `uploader.py`
+### 2. `guardarDb.py`
 #### 🛠️ **Funcionalidad Principal**
 - Automatiza la carga de datos extraídos en una base de datos **MySQL**.
 
@@ -63,12 +63,12 @@ Antes de ejecutar el proyecto, asegúrate de tener instalados:
 
 1. **Clonar el repositorio**:  
    ```bash
-   git clone <url-del-repositorio>
+   git clone https://github.com/Tobias-Stani/Scraper-Qanlex.git
    ```
 
 2. **Moverse al directorio del proyecto**:  
    ```bash
-   cd <nombre-del-repo>
+   cd Scraper-Qanlex
    ```
 
 3. **Construir la imagen de Docker**:  
@@ -124,7 +124,7 @@ Antes de ejecutar el proyecto, asegúrate de tener instalados:
 8. **Ejecutar los scripts**:  
    ```bash
    python scraper.py
-   python uploader.py
+   python guardarDb.py
    ```
 
 ---
@@ -141,7 +141,7 @@ Antes de ejecutar el proyecto, asegúrate de tener instalados:
 
 ### 📦 **Componentes**
 - **`scraper.py`**: Extracción de datos judiciales.  
-- **`uploader.py`**: Carga de datos en MySQL.  
+- **`guardarDb.py`**: Carga de datos en MySQL.  
 - **Docker**: Infraestructura para facilitar el despliegue.
 
 ### 🛠️ **Tecnologías Utilizadas**
@@ -157,5 +157,4 @@ Antes de ejecutar el proyecto, asegúrate de tener instalados:
 - Conexión a **internet estable**.  
 - Instalación de **Google Chrome** en la máquina host.  
 
----
 
