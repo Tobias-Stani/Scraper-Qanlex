@@ -48,20 +48,6 @@ Herramienta automatizada para la extracción de datos de **expedientes judiciale
 - Maneja **transacciones SQL** para asegurar la integridad de los datos.
 - Elimina el archivo JSON después de una carga exitosa.
 
----
-
-## 🔧 **Requisitos Previos**
-Antes de ejecutar el proyecto, asegúrate de tener instalados:
-
-- **Git**
-- **Docker** y **Docker Compose**
-- **Selenium**: Para la automatización del navegador.
-- **Webdriver-Manager**: Gestión automática de **ChromeDriver**.
-- **MySQL Connector for Python**: Para interactuar con la base de datos.
-
----
-
-
 ### 📝 **Correspondencia de los Datos Extraídos con la Consigna**
 
 A continuación, se detalla cómo cada campo extraído por el scraper corresponde con los requisitos establecidos en la consigna del proyecto:
@@ -76,6 +62,17 @@ A continuación, se detalla cómo cada campo extraído por el scraper correspond
 | **Tipo de Demanda**      | Tipo de caso o acción legal (por ejemplo, "Acción Civil").            | Corresponde al **tipo de demanda** o acción judicial.     |
 | **Juzgado o Tribunal**   | Juzgado o tribunal que está encargado del expediente.                 | Extraído de la información de **jurisdicción** y **dependencia**. |
 | **Fechas Relevantes**    | Fechas importantes asociadas al expediente (por ejemplo, fechas de audiencias, resoluciones). | Las **fechas** de los **movimientos** de cada expediente se extraen para registrar los eventos claves. |
+
+---
+
+## 🔧 **Requisitos Previos**
+Antes de ejecutar el proyecto, asegúrate de tener instalados:
+
+- **Git**
+- **Docker** y **Docker Compose**
+- **Selenium**: Para la automatización del navegador.
+- **Webdriver-Manager**: Gestión automática de **ChromeDriver**.
+- **MySQL Connector for Python**: Para interactuar con la base de datos.
 
 ---
 
