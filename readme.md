@@ -2,97 +2,143 @@
 
 ## 📝 Descripción del Proyecto
 
-Este proyecto es una herramienta de extracción automatizada de información de casos judiciales del sitio web del Poder Judicial Nacional. Su objetivo principal es:
+Herramienta automatizada para extracción de datos de expedientes judiciales del sitio web del Poder Judicial Nacional, con almacenamiento en base de datos MySQL.
 
-- Recopilar datos de expedientes judiciales
-- Extraer información detallada como número de expediente, jurisdicción, partes intervinientes, movimientos, etc.
-- Almacenar la información de manera estructurada en una base de datos MySQL
-
-## 🗂️ Archivos del Proyecto
+## 🗂️ Descripción Detallada de Scripts
 
 ### 1. `scraper.py`
-- **Función**: Extracción de datos judiciales
-- **Acciones**:
-  - Navega por el sitio web del Poder Judicial
-  - Resuelve manualmente el CAPTCHA
-  - Busca casos relacionados con "residuos"
-  - Extrae información de cada expediente
-  - Guarda los datos en un archivo `expedientes.json`
 
-### 2. `guardarDb.py`
-- **Función**: Carga de datos a base de datos MySQL
-- **Acciones**:
-  - Lee el archivo `expedientes.json`
-  - Inserta datos en tres tablas:
-    1. `expedientes`: Información general del caso
-    2. `movimientos`: Registros y movimientos del expediente
-    3. `participantes`: Actores y demandados
-  - Elimina el archivo JSON después de la carga
+#### Funcionalidad Principal
+- Automatiza la extracción de información de casos judiciales
 
-## 🐳 Configuración con Docker
+#### Acciones Específicas
+- Navega al sitio web del Poder Judicial Nacional
+- Realiza búsqueda con filtro de palabra clave "residuos"
+- Resuelve CAPTCHA de forma manual
+- Extrae información de cada expediente, incluyendo:
+  - Número de expediente
+  - Jurisdicción
+  - Dependencia
+  - Situación actual
+  - Carátula (descripción del caso)
+  - Movimientos del expediente
+  - Actores y demandados
+
+#### Salida
+- Genera archivo `expedientes.json` con todos los datos extraídos
+
+### 2. `uploader.py`
+
+#### Funcionalidad Principal
+- Carga automatizada de datos extraídos a base de datos MySQL
+
+#### Acciones Específicas
+- Lee archivo `expedientes.json`
+- Establece conexión con base de datos MySQL
+- Inserta datos en tres tablas relacionales:
+  1. `expedientes`: Información general del caso
+  2. `movimientos`: Historial de movimientos del expediente
+  3. `participantes`: Listado de actores y demandados
+
+#### Procesamiento de Datos
+- Limpia y formatea fechas
+- Maneja transacciones SQL para integridad de datos
+- Elimina archivo JSON después de carga exitosa
 
 ### Requisitos Previos
+- Git
 - Docker
 - Docker Compose
 
-### Pasos para Levantar el Proyecto
+### 1. Clonar Repositorio
 
-1. **Construir Contenedores**
 ```bash
+git clone https://github.com/[tu-usuario]/scraper-casos-judiciales.git
+cd scraper-casos-judiciales
+```
+
+### 2. Levantar Infraestructura Docker
+
+```bash
+# Construir contenedores
 docker-compose build
+
+# Iniciar servicios
+docker-compose up -d
 ```
 
-2. **Iniciar Servicios**
-```bash
-docker-compose up
+### 3. Acceso a phpMyAdmin
+
+- **URL**: http://localhost:9080
+- **Servidor**: `db`
+- **Usuario**: `scraperuser`
+- **Contraseña**: `scraperpass`
+
+### 4. Crear Estructura de Base de Datos
+
+#### Script de Creación de Tablas
+
+```sql
+CREATE TABLE expedientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    expediente VARCHAR(255),
+    jurisdiccion VARCHAR(255),
+    dependencia VARCHAR(255),
+    situacion_actual VARCHAR(255),
+    caratula VARCHAR(255)
+);
+
+CREATE TABLE movimientos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    expediente_id INT,
+    fecha DATE,
+    tipo VARCHAR(255),
+    detalle TEXT,
+    FOREIGN KEY (expediente_id) REFERENCES expedientes(id)
+);
+
+CREATE TABLE participantes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    expediente_id INT,
+    tipo VARCHAR(255),
+    nombre VARCHAR(255),
+    FOREIGN KEY (expediente_id) REFERENCES expedientes(id)
+);
 ```
 
-### Lo que Sucede Automáticamente
+### 5. Pasos en phpMyAdmin
 
-- Crea un contenedor MySQL
-- Genera la base de datos `scraper_data`
-- Crea las tablas necesarias
-- Levanta un contenedor con la aplicación de scraping
-- Habilita phpMyAdmin para administración (puerto 9080)
+1. Iniciar sesión en http://localhost:9080
+2. Seleccionar base de datos `scraper_data`
+3. Ir a pestaña "SQL"
+4. Pegar script de creación de tablas
+5. Ejecutar consulta
 
-### Ejecución de Scripts
+### 6. Ejecutar Scraper
 
-Los scripts se ejecutarán de forma automatizada:
-
-1. **Scraper**
 ```bash
+# Dentro del contenedor
 python scraper.py
-```
 
-2. **Uploader**
-```bash
+# Luego
 python guardarDb.py
 ```
 
-## 🔍 Detalles Técnicos
+## 🔍 Detalles del Proyecto
 
-### Base de Datos
-
-Tablas creadas:
-- `expedientes`: Datos generales del caso
-- `movimientos`: Historial de movimientos
-- `participantes`: Actores y demandados
+### Componentes
+- `scraper.py`: Extracción de datos judiciales
+- `uploader.py`: Carga a base de datos MySQL
+- Docker para infraestructura
 
 ### Tecnologías
+- Python
+- Selenium
+- MySQL
+- Docker
 
-- Lenguaje: Python
-- Web Scraping: Selenium
-- Base de Datos: MySQL
-- Contenedores: Docker
-
-## 🚨 Consideraciones Importantes
+## 🚨 Consideraciones
 
 - Resolución **manual** de CAPTCHA
 - Conexión a internet estable
 - Instalación de Google Chrome
-
-## 📦 Instalación de Dependencias
-
-```bash
-pip install -r requirements.txt
-```
