@@ -61,6 +61,48 @@ Antes de ejecutar el proyecto, asegúrate de tener instalados:
 
 ---
 
+
+### 📝 **Correspondencia de los Datos Extraídos con la Consigna**
+
+A continuación, se detalla cómo cada campo extraído por el scraper corresponde con los requisitos establecidos en la consigna del proyecto:
+
+| **Campo Extraído**      | **Descripción**                                                      | **Requisito de la Consigna**                              |
+|-------------------------|----------------------------------------------------------------------|----------------------------------------------------------|
+| **Expediente**           | Número único que identifica el expediente judicial.                  | El scraper extrae el número del expediente judicial.      |
+| **Dependencia**          | Dependencia judicial encargada de gestionar el expediente.           | Corresponde a la **Dependencia** del caso.                |
+| **Demandante**           | Actores o personas que inician el caso judicial.                     | Extraído como parte de los **actores** en el expediente.  |
+| **Demandado**            | Personas o entidades contra las cuales se inicia el proceso judicial. | Extraído como parte de los **demandados** en el expediente.|
+| **Carátula**             | Breve descripción o resumen del caso judicial.                       | Corresponde a la **carátula** o descripción del caso.     |
+| **Tipo de Demanda**      | Tipo de caso o acción legal (por ejemplo, "Acción Civil").            | Corresponde al **tipo de demanda** o acción judicial.     |
+| **Juzgado o Tribunal**   | Juzgado o tribunal que está encargado del expediente.                 | Extraído de la información de **jurisdicción** y **dependencia**. |
+| **Fechas Relevantes**    | Fechas importantes asociadas al expediente (por ejemplo, fechas de audiencias, resoluciones). | Las **fechas** de los **movimientos** de cada expediente se extraen para registrar los eventos claves. |
+
+---
+
+### 🔍 **Ejemplo de cómo se extraen los datos**
+
+- **Expediente**: El scraper extrae el número de expediente judicial directamente de la página web del Poder Judicial Nacional.
+- **Dependencia**: Se extrae de la jurisdicción correspondiente que lleva el caso.
+- **Demandante y Demandado**: Los actores (demandantes) y demandados se extraen de las listas asociadas al expediente judicial.
+- **Carátula**: Es la breve descripción del caso que se obtiene directamente de la información disponible en la página.
+- **Tipo de Demanda**: Este dato es derivado de la descripción de la causa (carátula) y otras fuentes disponibles en el expediente.
+- **Juzgado o Tribunal**: La jurisdicción y dependencia del caso indican el juzgado o tribunal que maneja el expediente.
+- **Fechas Relevantes**: El scraper extrae las fechas de los movimientos del expediente, como resoluciones, audiencias, entre otros.
+
+---
+
+### 📂 **Relación con la Base de Datos**
+
+- **Expediente**: Almacenado en la tabla `expedientes` en el campo `expediente`.
+- **Dependencia**: Almacenado en la tabla `expedientes` en el campo `dependencia`.
+- **Demandante y Demandado**: Almacenados en la tabla `participantes` con la información del `tipo` (actor o demandado) y `nombre`.
+- **Carátula**: Almacenado en la tabla `expedientes` en el campo `caratula`.
+- **Tipo de Demanda**: Este campo puede ser extraído de la carátula o los movimientos, y se puede almacenar en el campo `situacion_actual` de la tabla `expedientes`.
+- **Juzgado o Tribunal**: Extraído de la jurisdicción, se almacena en la tabla `expedientes` en el campo `jurisdiccion`.
+- **Fechas Relevantes**: Almacenadas en la tabla `movimientos`, con la fecha y el tipo de movimiento correspondiente.
+
+
+
 ## 🚀 **Pasos de Instalación y Ejecución**
 
 1. **Clonar el repositorio**:  
