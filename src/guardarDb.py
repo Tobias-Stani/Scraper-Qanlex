@@ -1,71 +1,126 @@
+import os
+import json
+import logging
+from typing import List, Dict, Optional
+from datetime import datetime
+
 import mysql.connector
 from mysql.connector import Error
-import json
-from datetime import datetime
-import os  # Para eliminar el archivo
+
+# Configuración de logging para tener un seguimiento detallado de las operaciones
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+class ScraperDatabaseError(Exception):
+    """Excepción personalizada para manejar errores específicos de la base de datos."""
+    pass
 
 class SubidorDeBaseDeDatos:
-    def __init__(self, host, usuario, contrasena, base_de_datos):
+    """
+    Clase para subir datos scrapeados a una base de datos MySQL.
+    
+    Gestiona la conexión, inserción de datos y manejo de errores durante 
+    el proceso de transferencia de información desde archivos JSON a MySQL.
+    """
+
+    def __init__(self, config: Dict[str, str]):
         """
-        Inicializa los parámetros de conexión a la base de datos.
+        Inicializa la configuración de conexión a la base de datos.
         
-        :param host: Host del servidor MySQL
-        :param usuario: Nombre de usuario de MySQL
-        :param contrasena: Contraseña de MySQL
-        :param base_de_datos: Nombre de la base de datos
+        :param config: Diccionario con configuraciones de conexión
+        :type config: Dict[str, str]
         """
-        self.host = host
-        self.usuario = usuario
-        self.contrasena = contrasena
-        self.base_de_datos = base_de_datos
+        self.config = config
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.conexion = None
 
-    def _conectar(self):
-        """Establece una conexión con la base de datos MySQL."""
+    def _conectar(self) -> None:
+        """
+        Establece una conexión segura con la base de datos MySQL.
+        
+        :raises ScraperDatabaseError: Si no se puede establecer la conexión
+        """
         try:
             self.conexion = mysql.connector.connect(
-                host=self.host,
-                user=self.usuario,
-                password=self.contrasena,
-                database=self.base_de_datos
+                host=self.config['host'],
+                user=self.config['usuario'],
+                password=self.config['contrasena'],
+                database=self.config['base_de_datos']
             )
             if self.conexion.is_connected():
-                print("Conexión exitosa a la base de datos")
+                self.logger.info("Conexión exitosa a la base de datos")
         except Error as e:
-            print(f"Error al conectar a la base de datos MySQL: {e}")
-            raise
+            error_msg = f"Error al conectar a la base de datos MySQL: {e}"
+            self.logger.error(error_msg)
+            raise ScraperDatabaseError(error_msg)
 
-    def _cerrar_conexion(self):
-        """Cierra la conexión a la base de datos."""
+    def _cerrar_conexion(self) -> None:
+        """Cierra de manera segura la conexión a la base de datos."""
         if self.conexion and self.conexion.is_connected():
             self.conexion.close()
-            print("Conexión a la base de datos cerrada")
+            self.logger.info("Conexión a la base de datos cerrada")
 
-    def limpiar_fecha(self, fecha):
-        """Limpia el texto de fecha antes de intentar convertirla a formato de fecha."""
-        if fecha:
-            # Eliminar cualquier texto innecesario antes de la fecha
-            fecha = fecha.replace('Fecha:', '').strip()  # Remueve 'Fecha:' y cualquier espacio adicional
-        return fecha
-
-    def subir_expedientes(self, archivo_datos_scrapeados):
+    def _validar_datos(self, datos: List[Dict]) -> bool:
         """
-        Subir los datos de expedientes scrapeados a la base de datos.
+        Valida la estructura básica de los datos scrapeados.
         
-        :param archivo_datos_scrapeados: Archivo JSON que contiene los datos scrapeados
+        :param datos: Lista de diccionarios con datos scrapeados
+        :return: True si los datos son válidos, False en caso contrario
+        """
+        if not datos:
+            self.logger.warning("No hay datos para procesar")
+            return False
+        
+        campos_requeridos = ['expediente', 'jurisdiccion', 'dependencia']
+        for caso in datos:
+            if not all(campo in caso for campo in campos_requeridos):
+                self.logger.error(f"Datos incompletos: {caso}")
+                return False
+        
+        return True
+
+    def limpiar_fecha(self, fecha: Optional[str]) -> Optional[datetime]:
+        """
+        Convierte y limpia el texto de fecha a un objeto datetime.
+        
+        :param fecha: Cadena de texto con la fecha
+        :return: Objeto datetime o None si no se puede convertir
+        """
+        if not fecha:
+            return None
+        
+        try:
+            # Eliminar texto adicional y convertir a datetime
+            fecha_limpia = fecha.replace('Fecha:', '').strip()
+            return datetime.strptime(fecha_limpia, '%d/%m/%Y').date()
+        except ValueError:
+            self.logger.warning(f"No se pudo convertir la fecha: {fecha}")
+            return None
+
+    def subir_expedientes(self, archivo_datos_scrapeados: str) -> None:
+        """
+        Sube los datos de expedientes desde un archivo JSON a la base de datos.
+        
+        :param archivo_datos_scrapeados: Ruta al archivo JSON con datos
+        :raises ScraperDatabaseError: Si ocurre un error durante la subida de datos
         """
         try:
-            # Asegurar la conexión a la base de datos
+            # Leer y validar datos
+            with open(archivo_datos_scrapeados, 'r', encoding='utf-8') as archivo:
+                datos_scrapeados = json.load(archivo)
+            
+            if not self._validar_datos(datos_scrapeados):
+                raise ScraperDatabaseError("Datos inválidos para subir")
+
+            # Establecer conexión
             self._conectar()
             cursor = self.conexion.cursor()
 
-            # Leer los datos scrapeados
-            with open(archivo_datos_scrapeados, 'r', encoding='utf-8') as archivo:
-                datos_scrapeados = json.load(archivo)
-
-            # Preparar y ejecutar la consulta SQL para cada expediente
+            # Procesar cada caso
             for caso in datos_scrapeados:
-                # Insertar en la tabla expedientes
+                # Inserción de expediente principal
                 consulta_expediente = """
                 INSERT INTO expedientes 
                 (expediente, jurisdiccion, dependencia, situacion_actual, caratula) 
@@ -82,7 +137,7 @@ class SubidorDeBaseDeDatos:
                 cursor.execute(consulta_expediente, valores_expediente)
                 expediente_id = cursor.lastrowid
 
-                # Insertar movimientos
+                # Inserción de movimientos
                 if caso.get('registros_tabla'):
                     consulta_movimientos = """
                     INSERT INTO movimientos 
@@ -91,50 +146,39 @@ class SubidorDeBaseDeDatos:
                     """
                     valores_movimientos = [
                         (expediente_id, 
-                         datetime.strptime(self.limpiar_fecha(registro['fecha']), '%d/%m/%Y').date() if registro['fecha'] else None, 
+                         self.limpiar_fecha(registro['fecha']), 
                          registro['tipo'], 
                          registro['detalle']) 
                         for registro in caso.get('registros_tabla', [])
                     ]
                     cursor.executemany(consulta_movimientos, valores_movimientos)
 
-                # Insertar participantes (actores y demandados)
+                # Inserción de participantes
                 consulta_participantes = """
                 INSERT INTO participantes 
                 (expediente_id, tipo, nombre) 
                 VALUES (%s, %s, %s)
                 """
-                valores_participantes = []
-                
-                # Añadir actores
-                valores_participantes.extend([
-                    (expediente_id, 'ACTOR', actor) 
-                    for actor in caso.get('actores', [])
-                ])
-                
-                # Añadir demandados
-                valores_participantes.extend([
-                    (expediente_id, 'DEMANDADO', demandado) 
-                    for demandado in caso.get('demandados', [])
-                ])
+                valores_participantes = (
+                    [(expediente_id, 'ACTOR', actor) for actor in caso.get('actores', [])] +
+                    [(expediente_id, 'DEMANDADO', demandado) for demandado in caso.get('demandados', [])]
+                )
                 
                 if valores_participantes:
                     cursor.executemany(consulta_participantes, valores_participantes)
 
-            # Confirmar la transacción
+            # Confirmar transacción
             self.conexion.commit()
-            print("¡Datos subidos exitosamente!")
+            self.logger.info("¡Datos subidos exitosamente!")
 
-            # Eliminar el archivo después de subir los datos
-            if os.path.exists(archivo_datos_scrapeados):
-                os.remove(archivo_datos_scrapeados)  # Elimina el archivo
-                print(f"El archivo {archivo_datos_scrapeados} ha sido eliminado exitosamente!")
+            # Eliminar archivo después de subida exitosa
+            self._eliminar_archivo(archivo_datos_scrapeados)
 
-        except Error as e:
-            print(f"Error al subir los datos: {e}")
-            # Deshacer la transacción en caso de error
+        except (Error, ScraperDatabaseError) as e:
+            self.logger.error(f"Error al subir los datos: {e}")
             if self.conexion:
                 self.conexion.rollback()
+            raise
         
         finally:
             # Cerrar cursor y conexión
@@ -142,20 +186,44 @@ class SubidorDeBaseDeDatos:
                 cursor.close()
             self._cerrar_conexion()
 
-def principal():
-    # Configuración de conexión para Docker Compose
-    subidor = SubidorDeBaseDeDatos(
-        host='172.29.0.2',     # IP del contenedor de base de datos
-        usuario='scraperuser',    # Usuario proporcionado
-        contrasena='scraperpass',  # Contraseña proporcionada
-        base_de_datos='scraper_data'  # Nombre de la base de datos
-    )
+    def _eliminar_archivo(self, ruta_archivo: str) -> None:
+        """
+        Elimina el archivo de forma segura.
+        
+        :param ruta_archivo: Ruta completa del archivo a eliminar
+        """
+        try:
+            if os.path.exists(ruta_archivo):
+                os.remove(ruta_archivo)
+                self.logger.info(f"Archivo {ruta_archivo} eliminado exitosamente")
+        except OSError as e:
+            self.logger.error(f"Error al eliminar el archivo: {e}")
 
-    # Ruta al archivo JSON con los datos scrapeados
-    archivo_datos_scrapeados = 'src/expedientes.json'
-    
-    # Subir datos
-    subidor.subir_expedientes(archivo_datos_scrapeados)
+def main():
+    """
+    Función principal para ejecutar la subida de datos.
+    Configuración centralizada y manejo de errores.
+    """
+    # Configuración de conexión 
+    config_db = {
+        'host': '172.29.0.2',
+        'usuario': 'scraperuser',
+        'contrasena': 'scraperpass',
+        'base_de_datos': 'scraper_data'
+    }
+
+    try:
+        # Ruta al archivo JSON con los datos scrapeados
+        archivo_datos = 'src/expedientes.json'
+        
+        # Instanciar y ejecutar subidor
+        subidor = SubidorDeBaseDeDatos(config_db)
+        subidor.subir_expedientes(archivo_datos)
+
+    except ScraperDatabaseError as e:
+        logging.error(f"Error en el proceso de subida: {e}")
+    except Exception as e:
+        logging.error(f"Error inesperado: {e}")
 
 if __name__ == "__main__":
-    principal()
+    main()

@@ -49,6 +49,8 @@ Herramienta automatizada para extracción de datos de expedientes judiciales del
 - Git
 - Docker
 - Docker Compose
+- Selenium: Para la automatización del navegador
+- Webdriver-Manager: Para gestionar automáticamente el controlador de Chrome (ChromeDriver).  
 
 ### 1. Clonar Repositorio
 
