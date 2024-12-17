@@ -206,7 +206,7 @@ def main():
     """
     # Configuración de conexión 
     config_db = {
-        'host': '172.29.0.2',
+        'host': '172.30.0.2',
         'usuario': 'scraperuser',
         'contrasena': 'scraperpass',
         'base_de_datos': 'scraper_data'

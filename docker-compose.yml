@@ -15,6 +15,9 @@ services:
       - DB_USER=scraperuser
       - DB_PASSWORD=scraperpass
       - DB_NAME=scraper_data
+    networks:
+      scraper_network:
+        ipv4_address: 172.30.0.3
 
   # Base de datos MySQL
   db:
@@ -27,6 +30,9 @@ services:
       - MYSQL_PASSWORD=scraperpass
     volumes:
       - mysql-data:/var/lib/mysql
+    networks:
+      scraper_network:
+        ipv4_address: 172.30.0.2
 
   # phpMyAdmin para administración de base de datos
   phpmyadmin:
@@ -39,6 +45,17 @@ services:
       - "9080:80"
     depends_on:
       - db
+    networks:
+      scraper_network:
+        ipv4_address: 172.30.0.4
+
+# Definición de la red personalizada
+networks:
+  scraper_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
 
 volumes:
   mysql-data:
