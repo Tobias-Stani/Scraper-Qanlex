@@ -48,6 +48,8 @@ Herramienta automatizada para la extracción de datos de **expedientes judiciale
 - Maneja **transacciones SQL** para asegurar la integridad de los datos.
 - Elimina el archivo JSON después de una carga exitosa.
 
+---
+
 ### 📝 **Correspondencia de los Datos Extraídos con la Consigna**
 
 A continuación, se detalla cómo cada campo extraído por el scraper corresponde con los requisitos establecidos en la consigna del proyecto:
