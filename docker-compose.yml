@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Servicio de la aplicación de scraping
+  scraper:
+    container_name: scraper-app
+    build: .
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=scraperuser
+      - DB_PASSWORD=scraperpass
+      - DB_NAME=scraper_data
+
+  # Base de datos MySQL
+  db:
+    container_name: scraper-db
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=scraper_data
+      - MYSQL_USER=scraperuser
+      - MYSQL_PASSWORD=scraperpass
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  # phpMyAdmin para administración de base de datos
+  phpmyadmin:
+    container_name: scraper-phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+    ports:
+      - "9080:80"
+    depends_on:
+      - db
+
+volumes:
+  mysql-data:
