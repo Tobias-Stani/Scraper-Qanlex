@@ -154,9 +154,34 @@ Antes de ejecutar el proyecto, asegúrate de tener instalados:
 
 ---
 
-## 🚨 **Consideraciones**
-- Resolución **manual** de CAPTCHA.  
-- Conexión a **internet estable**.  
-- Instalación de **Google Chrome** en la máquina host.  
+## 🚨 **Consideraciones Importantes**
+
+- **Resolución Manual de CAPTCHA**: 
+  - Durante la ejecución del script `scraper.py`, se requiere intervención manual para resolver el CAPTCHA. Asegúrate de estar disponible para completar esta tarea cuando se te solicite.
+
+- **Una vez resuelto el CAPTCHA**:
+  - Una vez resuelto el CAPTCHA, el usuario no necesitará hacer nada más. El proceso está completamente automatizado y el programa te indicará cualquier acción adicional que deba tomarse.
+  
+- **Conexión a Internet Estable**:
+  - La herramienta depende de una conexión a internet para acceder al sitio web y obtener los datos. Asegúrate de tener una conexión estable antes de ejecutar los scripts.
+
+- **Instalación de Google Chrome**:
+  - Se debe tener **Google Chrome** instalado en la máquina host, ya que **Selenium** utiliza este navegador para la automatización.
+
+- **Ejecutar el Script `scraper.py` Varias Veces**:
+  - Es posible que necesites ejecutar el script `scraper.py` varias veces para asegurarte de que se obtengan todos los expedientes disponibles. Esto es especialmente útil si el número de casos es grande y la búsqueda puede no devolver todos los resultados en una sola ejecución.
+
+- **Credenciales de Base de Datos**:
+  - Asegúrate de configurar correctamente las credenciales de acceso a la base de datos. Por defecto, las credenciales son las siguientes:
+  
+    ```bash
+    DB_HOST=172.30.0.2
+    DB_USER=scraperuser
+    DB_PASSWORD=scraperpass
+    DB_NAME=scraper_data
+    ```
+
+  - Verifica que estos valores coincidan con los configurados en tu entorno o en tu archivo `docker-compose.yml`.
+
 
 
