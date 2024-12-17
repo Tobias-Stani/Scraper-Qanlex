@@ -96,31 +96,34 @@ Antes de ejecutar el proyecto, asegúrate de tener instalados:
    Ejecutar la siguiente estructura SQL en MySQL:
 
    ```sql
-   CREATE TABLE expedientes (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       expediente VARCHAR(255),
-       jurisdiccion VARCHAR(255),
-       dependencia VARCHAR(255),
-       situacion_actual VARCHAR(255),
-       caratula VARCHAR(255)
-   );
-
-   CREATE TABLE movimientos (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       expediente_id INT,
-       fecha DATE,
-       tipo VARCHAR(255),
-       detalle TEXT,
-       FOREIGN KEY (expediente_id) REFERENCES expedientes(id)
-   );
-
-   CREATE TABLE participantes (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       expediente_id INT,
-       tipo VARCHAR(255),
-       nombre VARCHAR(255),
-       FOREIGN KEY (expediente_id) REFERENCES expedientes(id)
-   );
+    -- La tabla `expedientes` almacena información básica del expediente judicial.
+    CREATE TABLE expedientes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        expediente VARCHAR(255),           -- El número del expediente judicial
+        jurisdiccion VARCHAR(255),         -- La jurisdicción del caso
+        dependencia VARCHAR(255),          -- Dependencia que lleva el caso
+        situacion_actual VARCHAR(255),     -- Estado o situación actual del expediente
+        caratula VARCHAR(255)              -- Descripción breve del caso
+    );
+    
+    -- La tabla `movimientos` almacena los movimientos del expediente judicial.
+    CREATE TABLE movimientos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        expediente_id INT,                 -- Relacionado con el ID de la tabla `expedientes`
+        fecha DATE,                        -- Fecha del movimiento
+        tipo VARCHAR(255),                 -- Tipo de movimiento (ej. "Resolución", "Audiencia", etc.)
+        detalle TEXT,                      -- Descripción del movimiento
+        FOREIGN KEY (expediente_id) REFERENCES expedientes(id) -- Relación con `expedientes`
+    );
+    
+    -- La tabla `participantes` almacena los actores y demandados en el expediente.
+    CREATE TABLE participantes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        expediente_id INT,                 -- Relacionado con el ID de la tabla `expedientes`
+        tipo VARCHAR(255),                 -- Tipo de participante (actor, demandado, etc.)
+        nombre VARCHAR(255),               -- Nombre del participante
+        FOREIGN KEY (expediente_id) REFERENCES expedientes(id) -- Relación con `expedientes`
+    );
    ```
 
 8. **Ejecutar los scripts**:  
